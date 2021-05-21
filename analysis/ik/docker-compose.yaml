@@ -1,0 +1,76 @@
+version: '3.9'
+services:
+  cerebro:
+    image: lmenezes/cerebro
+    container_name: cerebro
+    ports:
+      - "9000:9000"
+    command:
+      - -Dhosts.0.host=http://host.docker.internal:9200
+      # 因为我是mac所以用host.docker.internal代替主机名
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.7.1
+    container_name: kibana7
+    environment:
+      - I18N_LOCALE=zh-CN
+      - XPACK_GRAPH_ENABLED=true
+      - TIMELION_ENABLED=true
+      - XPACK_MONITORING_COLLECTION_ENABLED="true"
+      - ELASTICSEARCH_HOSTS=http://host.docker.internal:9200
+    ports:
+      - "5601:5601"
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.7.1
+    container_name: es7_01
+    environment:
+      - cluster.name=cnblogs
+      - node.name=es7_01
+      - bootstrap.memory_lock=true
+      # 避免使用swap，减少磁盘IO
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      # 防止JVM内存回收
+      - discovery.seed_hosts=172.19.0.5,172.19.0.4
+      # 默认ES只搜索本机的其他节点，如果节点在其他主机上则需要在这里给出地址
+      - cluster.initial_master_nodes=es7_01,es7_02
+      # 初始化时符合主节点的节点方便选举
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./elasticsearch-jieba-plugin-7.7.1.zip:/usr/share/elasticsearch/plugins/elasticsearch-jieba-plugin-7.7.1.zip
+      - es7data1:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+
+  elasticsearch2:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.7.1
+    container_name: es7_02
+    environment:
+      - cluster.name=cnblogs
+      - node.name=es7_02
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.seed_hosts=172.19.0.5,172.19.0.4
+      - cluster.initial_master_nodes=es7_01,es7_02
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./elasticsearch-jieba-plugin-7.7.1.zip:/usr/share/elasticsearch/plugins/elasticsearch-jieba-plugin-7.7.1.zip
+      - es7data2:/usr/share/elasticsearch/data
+    expose:
+      - 9200
+
+
+volumes:
+  es7data1:
+    driver: local
+  es7data2:
+    driver: local
+
+networks:
+  default:
+    external: true
+    name: es7net
