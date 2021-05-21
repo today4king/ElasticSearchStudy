@@ -1,4 +1,4 @@
-version: '3.9'
+version: '3.8'
 services:
   cerebro:
     image: lmenezes/cerebro
@@ -9,7 +9,7 @@ services:
       - -Dhosts.0.host=http://host.docker.internal:9200
       # 因为我是mac所以用host.docker.internal代替主机名
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.7.1
+    image: docker.elastic.co/kibana/kibana:7.7.0
     container_name: kibana7
     environment:
       - I18N_LOCALE=zh-CN
@@ -20,7 +20,7 @@ services:
     ports:
       - "5601:5601"
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.7.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.7.0
     container_name: es7_01
     environment:
       - cluster.name=cnblogs
@@ -38,13 +38,13 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - ./elasticsearch-jieba-plugin-7.7.1.zip:/usr/share/elasticsearch/plugins/elasticsearch-jieba-plugin-7.7.1.zip
+      - ./elasticsearch-jieba-plugin-7.7.1:/usr/share/elasticsearch/plugins/elasticsearch-jieba-plugin-7.7.1
       - es7data1:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
 
   elasticsearch2:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.7.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.7.0
     container_name: es7_02
     environment:
       - cluster.name=cnblogs
@@ -58,7 +58,7 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - ./elasticsearch-jieba-plugin-7.7.1.zip:/usr/share/elasticsearch/plugins/elasticsearch-jieba-plugin-7.7.1.zip
+      - ./elasticsearch-jieba-plugin-7.7.1:/usr/share/elasticsearch/plugins/elasticsearch-jieba-plugin-7.7.1
       - es7data2:/usr/share/elasticsearch/data
     expose:
       - 9200
